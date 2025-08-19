@@ -1,95 +1,70 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import UserProfile from '@/components/UserProfile';
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
+    <div style={styles.container}>
+      <header style={styles.header}>
+        <h1 style={styles.title}>Shorts Poster</h1>
+        <p style={styles.subtitle}>Welcome to your authenticated dashboard</p>
+      </header>
+      
+      <main style={styles.main}>
+        <UserProfile />
       </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      
+      <footer style={styles.footer}>
+        <p style={styles.footerText}>
+          Powered by Google OAuth 2.0 & Next.js
+        </p>
       </footer>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: '#f9fafb',
+    fontFamily: 'var(--font-geist-sans)',
+  },
+  header: {
+    textAlign: 'center',
+    padding: '2rem 1rem 1rem',
+    backgroundColor: 'white',
+    borderBottom: '1px solid #e5e7eb',
+  },
+  title: {
+    fontSize: '3rem',
+    fontWeight: '800',
+    color: '#1f2937',
+    margin: '0 0 0.5rem 0',
+    background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
+  },
+  subtitle: {
+    fontSize: '1.125rem',
+    color: '#6b7280',
+    margin: 0,
+  },
+  main: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footer: {
+    textAlign: 'center',
+    padding: '2rem 1rem',
+    backgroundColor: 'white',
+    borderTop: '1px solid #e5e7eb',
+  },
+  footerText: {
+    fontSize: '0.875rem',
+    color: '#9ca3af',
+    margin: 0,
+  },
+};
