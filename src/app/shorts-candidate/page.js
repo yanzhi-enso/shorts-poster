@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { getValidAccessToken } from '@/lib/auth';
 import { listDriveFiles } from '@/lib/gdrive';
+import UserDropdown from '@/components/UserDropdown';
 import styles from './page.module.css';
 
 export default function ShortsCandidatePage() {
@@ -84,84 +85,89 @@ export default function ShortsCandidatePage() {
   // Show loading while fetching files
   if (loading) {
     return (
-      <div className={styles.container}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>Shorts Candidate</h1>
-          <p className={styles.subtitle}>Loading video files...</p>
-        </header>
-        <div className={styles.loadingContainer}>
-          <div className={styles.spinner}></div>
-          <p className={styles.loadingText}>Fetching files from Google Drive...</p>
+        <div className={styles.container}>
+            <header className={styles.header}>
+                <div className={styles.headerLeft}>
+                    <h1 className={styles.title}>Shorts Candidate</h1>
+                    <p className={styles.subtitle}>Loading video files...</p>
+                </div>
+                <div className={styles.headerRight}>
+                    <UserDropdown />
+                </div>
+            </header>
+            <div className={styles.loadingContainer}>
+                <div className={styles.spinner}></div>
+                <p className={styles.loadingText}>Fetching files from Google Drive...</p>
+            </div>
         </div>
-      </div>
     );
   }
 
   // Show error state
   if (error) {
     return (
-      <div className={styles.container}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>Shorts Candidate</h1>
-          <p className={styles.subtitle}>Error loading files</p>
-        </header>
-        <div className={styles.errorContainer}>
-          <p className={styles.errorText}>Error: {error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className={styles.retryButton}
-          >
-            Retry
-          </button>
+        <div className={styles.container}>
+            <header className={styles.header}>
+                <div className={styles.headerLeft}>
+                    <h1 className={styles.title}>Shorts Candidate</h1>
+                    <p className={styles.subtitle}>Error loading files</p>
+                </div>
+                <div className={styles.headerRight}>
+                    <UserDropdown />
+                </div>
+            </header>
+            <div className={styles.errorContainer}>
+                <p className={styles.errorText}>Error: {error}</p>
+                <button onClick={() => window.location.reload()} className={styles.retryButton}>
+                    Retry
+                </button>
+            </div>
         </div>
-      </div>
     );
   }
 
-  return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Shorts Candidate</h1>
-        <p className={styles.subtitle}>Video files from Google Drive folders</p>
-      </header>
+    return (
+        <div className={styles.container}>
+            <header className={styles.header}>
+                <div className={styles.headerLeft}>
+                    <h1 className={styles.title}>Shorts Candidate</h1>
+                </div>
+                <div className={styles.headerRight}>
+                    <UserDropdown />
+                </div>
+            </header>
 
-      <main className={styles.main}>
-        <div className={styles.columnsContainer}>
-          {/* One Min Folder Column */}
-          <div className={styles.column}>
-            <h2 className={styles.columnTitle}>
-              One Min Videos ({oneMinFiles.length})
-            </h2>
-            <div className={styles.filesList}>
-              {oneMinFiles.length === 0 ? (
-                <p className={styles.emptyMessage}>No video files found</p>
-              ) : (
-                oneMinFiles.map((file) => (
-                  <FileCard key={file.id} file={file} />
-                ))
-              )}
-            </div>
-          </div>
+            <main className={styles.main}>
+                <div className={styles.columnsContainer}>
+                    {/* One Min Folder Column */}
+                    <div className={styles.column}>
+                        <h2 className={styles.columnTitle}>
+                            One Min Videos ({oneMinFiles.length})
+                        </h2>
+                        <div className={styles.filesList}>
+                            {oneMinFiles.length === 0 ? (
+                                <p className={styles.emptyMessage}>No video files found</p>
+                            ) : (
+                                oneMinFiles.map((file) => <FileCard key={file.id} file={file} />)
+                            )}
+                        </div>
+                    </div>
 
-          {/* Shorts Folder Column */}
-          <div className={styles.column}>
-            <h2 className={styles.columnTitle}>
-              Shorts Videos ({shortsFiles.length})
-            </h2>
-            <div className={styles.filesList}>
-              {shortsFiles.length === 0 ? (
-                <p className={styles.emptyMessage}>No video files found</p>
-              ) : (
-                shortsFiles.map((file) => (
-                  <FileCard key={file.id} file={file} />
-                ))
-              )}
-            </div>
-          </div>
+                    {/* Shorts Folder Column */}
+                    <div className={styles.column}>
+                        <h2 className={styles.columnTitle}>Shorts Videos ({shortsFiles.length})</h2>
+                        <div className={styles.filesList}>
+                            {shortsFiles.length === 0 ? (
+                                <p className={styles.emptyMessage}>No video files found</p>
+                            ) : (
+                                shortsFiles.map((file) => <FileCard key={file.id} file={file} />)
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
-      </main>
-    </div>
-  );
+    );
 }
 
 // File card component
