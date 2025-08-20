@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { getGoogleAuthUrl, tokenStorage } from '@/lib/auth';
+import styles from './page.module.css';
 
 export default function AuthPage() {
   useEffect(() => {
@@ -17,25 +18,19 @@ export default function AuthPage() {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Welcome to Shorts Poster</h1>
-        <p style={styles.description}>
+    <div className={styles.container}>
+      <div className={styles.card}>
+        <h1 className={styles.title}>Welcome to Shorts Poster</h1>
+        <p className={styles.description}>
           Please sign in with your Google account to continue
         </p>
         
         <button
           onClick={handleGoogleLogin}
-          style={styles.googleButton}
-          onMouseOver={(e) => {
-            e.target.style.backgroundColor = '#1565c0';
-          }}
-          onMouseOut={(e) => {
-            e.target.style.backgroundColor = '#1976d2';
-          }}
+          className={styles.googleButton}
         >
           <svg
-            style={styles.googleIcon}
+            className={styles.googleIcon}
             viewBox="0 0 24 24"
             width="20"
             height="20"
@@ -60,8 +55,8 @@ export default function AuthPage() {
           Continue with Google
         </button>
 
-        <div style={styles.footer}>
-          <p style={styles.footerText}>
+        <div className={styles.footer}>
+          <p className={styles.footerText}>
             By signing in, you agree to our terms of service and privacy policy.
           </p>
         </div>
@@ -69,66 +64,3 @@ export default function AuthPage() {
     </div>
   );
 }
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
-    fontFamily: 'var(--font-geist-sans)',
-  },
-  card: {
-    backgroundColor: 'white',
-    padding: '3rem',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    textAlign: 'center',
-    maxWidth: '400px',
-    width: '100%',
-    margin: '0 1rem',
-  },
-  title: {
-    fontSize: '2rem',
-    fontWeight: '700',
-    color: '#1f2937',
-    marginBottom: '0.5rem',
-  },
-  description: {
-    fontSize: '1rem',
-    color: '#6b7280',
-    marginBottom: '2rem',
-    lineHeight: '1.5',
-  },
-  googleButton: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '0.75rem',
-    width: '100%',
-    padding: '0.75rem 1rem',
-    backgroundColor: '#1976d2',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '1rem',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease-in-out',
-  },
-  googleIcon: {
-    flexShrink: 0,
-  },
-  footer: {
-    marginTop: '2rem',
-    paddingTop: '1.5rem',
-    borderTop: '1px solid #e5e7eb',
-  },
-  footerText: {
-    fontSize: '0.875rem',
-    color: '#9ca3af',
-    lineHeight: '1.4',
-    margin: 0,
-  },
-};

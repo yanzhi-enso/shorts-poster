@@ -1,70 +1,37 @@
-import UserProfile from '@/components/UserProfile';
+'use client';
+
+import { useEffect } from 'react';
+import { useAuth } from '@/components/AuthProvider';
+import styles from './page.module.css';
 
 export default function Home() {
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    // If user is authenticated, redirect to shorts-candidate page
+    if (!isLoading && user) {
+      window.location.href = '/shorts-candidate';
+    }
+  }, [user, isLoading]);
+
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.spinner}></div>
+        <p className={styles.loadingText}>Loading...</p>
+      </div>
+    );
+  }
+
+  // This should not be reached since AuthProvider redirects unauthenticated users to /g/auth
+  // But just in case, show a fallback
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
-        <h1 style={styles.title}>Shorts Poster</h1>
-        <p style={styles.subtitle}>Welcome to your authenticated dashboard</p>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>Shorts Poster</h1>
+        <p className={styles.subtitle}>Redirecting...</p>
       </header>
-      
-      <main style={styles.main}>
-        <UserProfile />
-      </main>
-      
-      <footer style={styles.footer}>
-        <p style={styles.footerText}>
-          Powered by Google OAuth 2.0 & Next.js
-        </p>
-      </footer>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: '#f9fafb',
-    fontFamily: 'var(--font-geist-sans)',
-  },
-  header: {
-    textAlign: 'center',
-    padding: '2rem 1rem 1rem',
-    backgroundColor: 'white',
-    borderBottom: '1px solid #e5e7eb',
-  },
-  title: {
-    fontSize: '3rem',
-    fontWeight: '800',
-    color: '#1f2937',
-    margin: '0 0 0.5rem 0',
-    background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text',
-  },
-  subtitle: {
-    fontSize: '1.125rem',
-    color: '#6b7280',
-    margin: 0,
-  },
-  main: {
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  footer: {
-    textAlign: 'center',
-    padding: '2rem 1rem',
-    backgroundColor: 'white',
-    borderTop: '1px solid #e5e7eb',
-  },
-  footerText: {
-    fontSize: '0.875rem',
-    color: '#9ca3af',
-    margin: 0,
-  },
-};
