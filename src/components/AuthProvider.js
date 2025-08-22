@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
 
   useEffect(() => {
     const checkAuthentication = async () => {
@@ -20,16 +21,19 @@ export function AuthProvider({ children }) {
         }
 
         // Try to get a valid access token (will refresh if needed)
-        const accessToken = await getValidAccessToken();
+        const validAccessToken = await getValidAccessToken();
         
-        if (!accessToken) {
+        if (!validAccessToken) {
           // Token refresh failed, redirect to auth
           setIsLoading(false);
           return;
         }
 
+        // Store the access token
+        setAccessToken(validAccessToken);
+
         // Get user info
-        const userInfo = await getUserInfo(accessToken);
+        const userInfo = await getUserInfo(validAccessToken);
         setUser(userInfo);
         setIsAuthenticated(true);
         
@@ -56,10 +60,39 @@ export function AuthProvider({ children }) {
     }
   }, [isLoading, isAuthenticated]);
 
+  const getAccessToken = async () => {
+    try {
+      // If we already have a valid token, return it
+      if (accessToken) {
+        return accessToken;
+      }
+
+      // Try to get a valid access token (will refresh if needed)
+      const validAccessToken = await getValidAccessToken();
+      
+      if (!validAccessToken) {
+        // Token refresh failed, redirect to auth
+        window.location.href = '/g/auth';
+        return null;
+      }
+
+      // Update the stored access token
+      setAccessToken(validAccessToken);
+      return validAccessToken;
+    } catch (error) {
+      console.error('Error getting access token:', error);
+      // Clear invalid tokens and redirect
+      tokenStorage.clearTokens();
+      window.location.href = '/g/auth';
+      return null;
+    }
+  };
+
   const logout = () => {
     tokenStorage.clearTokens();
     setIsAuthenticated(false);
     setUser(null);
+    setAccessToken(null);
     window.location.href = '/g/auth';
   };
 
@@ -67,6 +100,8 @@ export function AuthProvider({ children }) {
     isAuthenticated,
     isLoading,
     user,
+    accessToken,
+    getAccessToken,
     logout,
   };
 

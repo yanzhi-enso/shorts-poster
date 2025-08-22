@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
-import { getValidAccessToken } from '@/lib/auth';
 import { listDriveFiles } from '@/lib/gdrive';
 import UserDropdown from '@/components/UserDropdown';
 import styles from './page.module.css';
 
 export default function ShortsCandidatePage() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, accessToken, getAccessToken } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [oneMinFiles, setOneMinFiles] = useState([]);
@@ -18,8 +17,6 @@ export default function ShortsCandidatePage() {
   const ONE_MIN_FOLDER_ID = '1rhc9L6ISTDbrZ6swO6COQa9gA24dopcT';
   const SHORTS_FOLDER_ID = '1zAH7h3LcquWdF-OEuBI_OeXagRD3rPce';
 
-  const [accessToken, setAccessToken] = useState(null);
-
   useEffect(() => {
     const fetchFiles = async () => {
       if (authLoading || !user) return;
@@ -28,14 +25,12 @@ export default function ShortsCandidatePage() {
         setLoading(true);
         setError(null);
 
-        // Get valid access token
-        const token = await getValidAccessToken();
+        // Get valid access token from AuthProvider
+        const token = await getAccessToken();
         if (!token) {
-          // Token validation failed, redirect to auth
-          window.location.href = '/g/auth';
+          // Token validation failed, will be handled by AuthProvider
           return;
         }
-        setAccessToken(token);
 
         // Fetch files from both folders in parallel
         const [oneMinResponse, shortsResponse] = await Promise.all([
@@ -77,18 +72,13 @@ export default function ShortsCandidatePage() {
       } catch (err) {
         console.error('Error fetching files:', err);
         setError(err.message);
-        
-        // If it's an auth error, redirect to auth page
-        if (err.message.includes('401') || err.message.includes('unauthorized')) {
-          window.location.href = '/g/auth';
-        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchFiles();
-  }, [user, authLoading]);
+  }, [user, authLoading, getAccessToken]);
 
   // Show loading while auth is checking
   if (authLoading) {
