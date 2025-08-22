@@ -9,7 +9,7 @@ export async function listDriveFiles(accessToken, options = {}) {
   try {
     const params = new URLSearchParams({
       pageSize: options.pageSize || '100',
-      fields: 'files(id,name,mimeType,parents,createdTime,modifiedTime,size,webViewLink)',
+      fields: 'files(id,name,mimeType,parents,createdTime,modifiedTime,size,webViewLink,thumbnailLink)',
       ...(options.q && { q: options.q }),
       ...(options.pageToken && { pageToken: options.pageToken })
     });
