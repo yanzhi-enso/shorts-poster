@@ -18,6 +18,8 @@ export default function ShortsCandidatePage() {
   const ONE_MIN_FOLDER_ID = '1rhc9L6ISTDbrZ6swO6COQa9gA24dopcT';
   const SHORTS_FOLDER_ID = '1zAH7h3LcquWdF-OEuBI_OeXagRD3rPce';
 
+  const [accessToken, setAccessToken] = useState(null);
+
   useEffect(() => {
     const fetchFiles = async () => {
       if (authLoading || !user) return;
@@ -27,20 +29,21 @@ export default function ShortsCandidatePage() {
         setError(null);
 
         // Get valid access token
-        const accessToken = await getValidAccessToken();
-        if (!accessToken) {
+        const token = await getValidAccessToken();
+        if (!token) {
           // Token validation failed, redirect to auth
           window.location.href = '/g/auth';
           return;
         }
+        setAccessToken(token);
 
         // Fetch files from both folders in parallel
         const [oneMinResponse, shortsResponse] = await Promise.all([
-          listDriveFiles(accessToken, {
+          listDriveFiles(token, {
             q: `'${ONE_MIN_FOLDER_ID}' in parents and trashed=false`,
             pageSize: 100
           }),
-          listDriveFiles(accessToken, {
+          listDriveFiles(token, {
             q: `'${SHORTS_FOLDER_ID}' in parents and trashed=false`,
             pageSize: 100
           })
@@ -53,8 +56,23 @@ export default function ShortsCandidatePage() {
             (file.name && file.name.toLowerCase().endsWith('.mp4'))
           );
 
-        setOneMinFiles(filterVideoFiles(oneMinResponse.files || []));
-        setShortsFiles(filterVideoFiles(shortsResponse.files || []));
+        const oneMinFiltered = filterVideoFiles(oneMinResponse.files || []);
+        const shortsFiltered = filterVideoFiles(shortsResponse.files || []);
+
+        // Debug: Log the first file to see what data we're getting
+        if (oneMinFiltered.length > 0) {
+          console.log('Debug - First One Min file data:', oneMinFiltered[0]);
+          console.log('Debug - Has thumbnailLink?', !!oneMinFiltered[0].thumbnailLink);
+          console.log('Debug - ThumbnailLink value:', oneMinFiltered[0].thumbnailLink);
+        }
+        if (shortsFiltered.length > 0) {
+          console.log('Debug - First Shorts file data:', shortsFiltered[0]);
+          console.log('Debug - Has thumbnailLink?', !!shortsFiltered[0].thumbnailLink);
+          console.log('Debug - ThumbnailLink value:', shortsFiltered[0].thumbnailLink);
+        }
+
+        setOneMinFiles(oneMinFiltered);
+        setShortsFiles(shortsFiltered);
 
       } catch (err) {
         console.error('Error fetching files:', err);
@@ -148,7 +166,7 @@ export default function ShortsCandidatePage() {
                             {oneMinFiles.length === 0 ? (
                                 <p className={styles.emptyMessage}>No video files found</p>
                             ) : (
-                                oneMinFiles.map((file) => <FileCard key={file.id} file={file} />)
+                                oneMinFiles.map((file) => <FileCard key={file.id} file={file} accessToken={accessToken} />)
                             )}
                         </div>
                     </div>
@@ -160,7 +178,7 @@ export default function ShortsCandidatePage() {
                             {shortsFiles.length === 0 ? (
                                 <p className={styles.emptyMessage}>No video files found</p>
                             ) : (
-                                shortsFiles.map((file) => <FileCard key={file.id} file={file} />)
+                                shortsFiles.map((file) => <FileCard key={file.id} file={file} accessToken={accessToken} />)
                             )}
                         </div>
                     </div>
@@ -171,7 +189,10 @@ export default function ShortsCandidatePage() {
 }
 
 // File card component
-function FileCard({ file }) {
+function FileCard({ file, accessToken }) {
+  const [thumbnailError, setThumbnailError] = useState(false);
+  const [thumbnailLoading, setThumbnailLoading] = useState(true);
+
   const formatFileSize = (bytes) => {
     if (!bytes) return 'Unknown size';
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -184,9 +205,56 @@ function FileCard({ file }) {
     return new Date(dateString).toLocaleDateString();
   };
 
+  // Generate thumbnail URL with authentication and size
+  const getThumbnailUrl = () => {
+    if (!file.thumbnailLink || !accessToken) {
+      console.log(`Debug - FileCard ${file.name}: No thumbnail URL - thumbnailLink: ${!!file.thumbnailLink}, accessToken: ${!!accessToken}`);
+      return null;
+    }
+    // Add size parameter for 150x150 and access token for authentication
+    const url = `${file.thumbnailLink}=s150&access_token=${accessToken}`;
+    console.log(`Debug - FileCard ${file.name}: Generated thumbnail URL:`, url);
+    return url;
+  };
+
+  const thumbnailUrl = getThumbnailUrl();
+
+  const handleThumbnailLoad = () => {
+    console.log(`Debug - FileCard ${file.name}: Thumbnail loaded successfully`);
+    setThumbnailLoading(false);
+  };
+
+  const handleThumbnailError = (error) => {
+    console.log(`Debug - FileCard ${file.name}: Thumbnail failed to load`, error);
+    console.log(`Debug - FileCard ${file.name}: Failed URL was:`, thumbnailUrl);
+    setThumbnailError(true);
+    setThumbnailLoading(false);
+  };
+
   return (
     <div className={styles.fileCard}>
-      <div className={styles.fileIcon}>🎥</div>
+      <div className={styles.fileIcon}>
+        {!thumbnailUrl || thumbnailError ? (
+          // Fallback to emoji if no thumbnail or error
+          <span className={styles.videoEmoji}>🎥</span>
+        ) : (
+          <div className={styles.thumbnailContainer}>
+            {thumbnailLoading && (
+              <div className={styles.thumbnailLoading}>
+                <span className={styles.videoEmoji}>🎥</span>
+              </div>
+            )}
+            <img
+              src={thumbnailUrl}
+              alt={`Thumbnail for ${file.name}`}
+              className={styles.thumbnail}
+              onLoad={handleThumbnailLoad}
+              onError={handleThumbnailError}
+              style={{ display: thumbnailLoading ? 'none' : 'block' }}
+            />
+          </div>
+        )}
+      </div>
       <div className={styles.fileInfo}>
         <h3 className={styles.fileName}>{file.name}</h3>
         <div className={styles.fileDetails}>
