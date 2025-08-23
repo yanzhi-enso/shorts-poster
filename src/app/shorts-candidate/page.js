@@ -81,6 +81,13 @@ export default function ShortsCandidatePage() {
     fetchFiles();
   }, [user, authLoading, getAccessToken]);
 
+  // Handle file download and removal from UI
+  const handleFileDownloaded = (fileId) => {
+    // Remove the file from both arrays (it will only exist in one)
+    setOneMinFiles(prev => prev.filter(file => file.id !== fileId));
+    setShortsFiles(prev => prev.filter(file => file.id !== fileId));
+  };
+
   // Show loading while auth is checking
   if (authLoading) {
     return (
@@ -152,11 +159,13 @@ export default function ShortsCandidatePage() {
                         title="One Min Videos"
                         files={oneMinFiles}
                         accessToken={accessToken}
+                        onFileDownloaded={handleFileDownloaded}
                     />
                     <VideoColumn 
                         title="Shorts Videos" 
                         files={shortsFiles}
                         accessToken={accessToken}
+                        onFileDownloaded={handleFileDownloaded}
                     />
                 </div>
             </main>

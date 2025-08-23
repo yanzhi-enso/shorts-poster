@@ -156,6 +156,33 @@ export async function deleteDriveFile(accessToken, fileId) {
 }
 
 /**
+ * Move a file to a different folder
+ */
+export async function moveFileToFolder(accessToken, fileId, newParentId, oldParentId) {
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${fileId}?addParents=${newParentId}&removeParents=${oldParentId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to move file: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error moving file:', error);
+    throw error;
+  }
+}
+
+/**
  * Helper function to get files from a specific shared folder
  */
 export async function getFilesFromSharedFolder(accessToken, folderName) {

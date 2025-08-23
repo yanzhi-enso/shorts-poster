@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { FaDownload } from 'react-icons/fa';
 import styles from './FileCard.module.css';
 
-export default function FileCard({ file, accessToken }) {
+export default function FileCard({ file, accessToken, onFileDownloaded }) {
   const [thumbnailError, setThumbnailError] = useState(false);
   const [thumbnailLoading, setThumbnailLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
 
   const formatFileSize = (bytes) => {
     if (!bytes) return 'Unknown size';
@@ -45,6 +47,56 @@ export default function FileCard({ file, accessToken }) {
     setThumbnailLoading(false);
   };
 
+  const handleDownload = async () => {
+    if (!accessToken || !file.id || downloading) return;
+    
+    try {
+      setDownloading(true);
+      
+      const response = await fetch('/api/download-and-move', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fileId: file.id,
+          fileName: file.name,
+          accessToken: accessToken,
+          parentId: file.parents?.[0] // Current folder ID to determine the correct Posted folder
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.statusText}`);
+      }
+
+      // Get the file blob for download
+      const blob = await response.blob();
+      
+      // Create download link and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      // Notify parent component that file was downloaded/moved
+      if (onFileDownloaded) {
+        onFileDownloaded(file.id);
+      }
+
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      alert(`Failed to download file: ${error.message}`);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className={styles.fileCard}>
       <div className={styles.fileIcon}>
@@ -75,16 +127,27 @@ export default function FileCard({ file, accessToken }) {
           <p className={styles.fileDetail}>Size: {formatFileSize(file.size)}</p>
           <p className={styles.fileDetail}>Modified: {formatDate(file.modifiedTime)}</p>
         </div>
-        {file.webViewLink && (
-          <a 
-            href={file.webViewLink} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={styles.viewLink}
+        <div className={styles.fileActions}>
+          {file.webViewLink && (
+            <a 
+              href={file.webViewLink} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={styles.viewLink}
+            >
+              View in Drive
+            </a>
+          )}
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            className={styles.downloadButton}
+            title="Download and move to Posted folder"
           >
-            View in Drive
-          </a>
-        )}
+            <FaDownload className={styles.downloadIcon} />
+            {downloading ? 'Downloading...' : 'Download & Post'}
+          </button>
+        </div>
       </div>
     </div>
   );
