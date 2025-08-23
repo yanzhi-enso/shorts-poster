@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { listDriveFiles } from '@/lib/gdrive';
 import UserDropdown from '@/components/UserDropdown';
-import FileCard from '@/components/FileCard';
+import VideoColumn from '@/components/VideoColumn';
 import styles from './page.module.css';
 
 export default function ShortsCandidatePage() {
@@ -148,31 +148,16 @@ export default function ShortsCandidatePage() {
 
             <main className={styles.main}>
                 <div className={styles.columnsContainer}>
-                    {/* One Min Folder Column */}
-                    <div className={styles.column}>
-                        <h2 className={styles.columnTitle}>
-                            One Min Videos ({oneMinFiles.length})
-                        </h2>
-                        <div className={styles.filesList}>
-                            {oneMinFiles.length === 0 ? (
-                                <p className={styles.emptyMessage}>No video files found</p>
-                            ) : (
-                                oneMinFiles.map((file) => <FileCard key={file.id} file={file} accessToken={accessToken} />)
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Shorts Folder Column */}
-                    <div className={styles.column}>
-                        <h2 className={styles.columnTitle}>Shorts Videos ({shortsFiles.length})</h2>
-                        <div className={styles.filesList}>
-                            {shortsFiles.length === 0 ? (
-                                <p className={styles.emptyMessage}>No video files found</p>
-                            ) : (
-                                shortsFiles.map((file) => <FileCard key={file.id} file={file} accessToken={accessToken} />)
-                            )}
-                        </div>
-                    </div>
+                    <VideoColumn 
+                        title="One Min Videos"
+                        files={oneMinFiles}
+                        accessToken={accessToken}
+                    />
+                    <VideoColumn 
+                        title="Shorts Videos" 
+                        files={shortsFiles}
+                        accessToken={accessToken}
+                    />
                 </div>
             </main>
         </div>
