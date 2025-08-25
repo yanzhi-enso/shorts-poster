@@ -115,11 +115,13 @@ export async function getUserInfo(accessToken) {
  * Token storage functions
  */
 export const tokenStorage = {
-  // Store tokens in localStorage (separate lines as requested)
+  // Store tokens in localStorage with timestamp
   setTokens(accessToken, refreshToken) {
     if (typeof window !== 'undefined') {
+      const timestamp = Date.now();
       localStorage.setItem('google_access_token', accessToken);
       localStorage.setItem('google_refresh_token', refreshToken);
+      localStorage.setItem('google_token_timestamp', timestamp.toString());
     }
   },
 
@@ -139,11 +141,33 @@ export const tokenStorage = {
     return null;
   },
 
+  // Get token timestamp
+  getTokenTimestamp() {
+    if (typeof window !== 'undefined') {
+      const timestamp = localStorage.getItem('google_token_timestamp');
+      return timestamp ? parseInt(timestamp, 10) : null;
+    }
+    return null;
+  },
+
+  // Check if token is expired (older than 50 minutes)
+  isTokenExpired() {
+    const timestamp = this.getTokenTimestamp();
+    if (!timestamp) {
+      return true; // No timestamp means expired
+    }
+    
+    const now = Date.now();
+    const fiftyMinutesInMs = 50 * 60 * 1000; // 50 minutes in milliseconds
+    return (now - timestamp) > fiftyMinutesInMs;
+  },
+
   // Clear all tokens
   clearTokens() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('google_access_token');
       localStorage.removeItem('google_refresh_token');
+      localStorage.removeItem('google_token_timestamp');
     }
   },
 
@@ -161,24 +185,34 @@ export async function getValidAccessToken() {
   const refreshToken = tokenStorage.getRefreshToken();
 
   if (!refreshToken) {
+    console.log("refresh token is null, unable to refresh access token");
     return null;
   }
 
-  if (!accessToken) {
-    // No access token, try to refresh
+  // Check if token exists and is not expired
+  if (!accessToken || tokenStorage.isTokenExpired()) {
+    if (!accessToken) {
+      console.log("access token is null, attempting to refresh using refresh token");
+    } else {
+      console.log("access token is expired (older than 50 minutes), attempting to refresh");
+    }
+    
+    // No access token or token is expired, try to refresh
     try {
       const tokens = await refreshAccessToken(refreshToken);
+      console.log("Successfully refreshed access token");
       tokenStorage.setTokens(tokens.access_token, refreshToken);
+      console.log("set new access token in localStorage with updated timestamp");
       return tokens.access_token;
     } catch (error) {
       // Refresh failed, clear tokens
+      console.error("Token refresh failed:", error);
       tokenStorage.clearTokens();
       return null;
     }
   }
 
-  // TODO: In production, you might want to check if the token is expired
-  // For now, we'll assume it's valid and let the API calls handle expiration
+  console.log("access token is valid and not expired, returning existing token");
   return accessToken;
 }
 
