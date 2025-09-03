@@ -1,92 +1,40 @@
 // Google OAuth configuration
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_SECRET;
-const REDIRECT_URI = typeof window !== 'undefined' ? `${window.location.origin}/g/redirect` : 'http://localhost:3000/g/redirect';
+const GOOGLE_OAUTH_CLIENT_ID =
+    '291823411154-7oqitku2enrn2q9n5va5g7oobs30brek.apps.googleusercontent.com';
+const REDIRECT_URI =
+    typeof window !== 'undefined'
+        ? `${window.location.origin}/g/redirect`
+        : 'http://localhost:3000/g/redirect';
 
 // OAuth scopes
 const SCOPES = [
-  'openid',
-  'profile',
-  'email',
-  'https://www.googleapis.com/auth/drive'  // Full Google Drive access
+    'openid',
+    'profile',
+    'email',
+    'https://www.googleapis.com/auth/drive', // Full Google Drive access
 ].join(' ');
+
+// Import backend functions
+import { exchangeCodeForTokens, refreshAccessToken } from '../utils/backend.js';
 
 /**
  * Generate Google OAuth authorization URL
  */
 export function getGoogleAuthUrl() {
-  const params = new URLSearchParams({
-    client_id: GOOGLE_CLIENT_ID,
-    redirect_uri: REDIRECT_URI,
-    response_type: 'code',
-    scope: SCOPES,
-    access_type: 'offline',
-    prompt: 'consent'
-  });
-
-  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-}
-
-/**
- * Exchange authorization code for tokens
- */
-export async function exchangeCodeForTokens(code) {
-  try {
-    const response = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        code,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
+    const params = new URLSearchParams({
+        client_id: GOOGLE_OAUTH_CLIENT_ID,
         redirect_uri: REDIRECT_URI,
-        grant_type: 'authorization_code',
-      }),
+        response_type: 'code',
+        scope: SCOPES,
+        access_type: 'offline',
+        prompt: 'consent',
     });
 
-    if (!response.ok) {
-      throw new Error(`Token exchange failed: ${response.statusText}`);
-    }
-
-    const tokens = await response.json();
-    return tokens;
-  } catch (error) {
-    console.error('Error exchanging code for tokens:', error);
-    throw error;
-  }
+    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
 
-/**
- * Refresh access token using refresh token
- */
-export async function refreshAccessToken(refreshToken) {
-  try {
-    const response = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        refresh_token: refreshToken,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
-        grant_type: 'refresh_token',
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Token refresh failed: ${response.statusText}`);
-    }
-
-    const tokens = await response.json();
-    return tokens;
-  } catch (error) {
-    console.error('Error refreshing access token:', error);
-    throw error;
-  }
-}
+// Re-export backend functions for backwards compatibility
+export { exchangeCodeForTokens, refreshAccessToken } from '../utils/backend.js';
 
 /**
  * Get user info from Google
