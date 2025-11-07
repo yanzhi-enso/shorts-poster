@@ -36,6 +36,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 2rem 1rem;
 }
 
 .footer {
@@ -76,6 +77,44 @@
   font-size: 1rem;
   color: #6b7280;
   margin: 0;
+}
+
+.statusCard {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+  text-align: center;
+}
+
+.statusText {
+  font-size: 1.25rem;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.statusSubtext {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0 0 1.5rem 0;
+}
+
+.primaryButton {
+  display: inline-block;
+  padding: 0.75rem 1.75rem;
+  background: linear-gradient(135deg, #1976d2, #42a5f5);
+  color: white;
+  border-radius: 9999px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primaryButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(25, 118, 210, 0.25);
 }
 
 /* Animations */
