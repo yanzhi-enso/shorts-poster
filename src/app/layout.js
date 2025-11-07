@@ -1,8 +1,7 @@
 'use client';
 
 import { Geist, Geist_Mono } from "next/font/google";
-import { usePathname } from 'next/navigation';
-import { AuthProvider } from '@/components/AuthProvider';
+import { AuthProvider } from '@/authManager/authContext';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,27 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export default function RootLayout({ children }) {
-  const pathname = usePathname();
-  
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <LayoutContent pathname={pathname}>{children}</LayoutContent>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
-  );
-}
-
-function LayoutContent({ children, pathname }) {
-  // Don't wrap auth pages with AuthProvider
-  if (pathname && pathname.startsWith('/g/')) {
-    return children;
-  }
-  
-  // Wrap all other pages with AuthProvider for protection
-  return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
   );
 }
