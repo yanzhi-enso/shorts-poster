@@ -29,11 +29,21 @@ export async function POST(request) {
         const title = sanitizeString(body.title);
         const videoUrl = sanitizeString(body.videoUrl);
         const videoManifestUrl = sanitizeString(body.videoManifestUrl);
+        const thumbnailUrl = sanitizeString(body.thumbnailUrl);
         const category = sanitizeString(body.category);
         const type = sanitizeString(body.type);
         const authorId = sanitizeString(body.authorId) || null;
 
-        if (!projectId || !title || !videoUrl || !videoManifestUrl || !category || !type || !authorId) {
+        if (
+            !projectId ||
+            !title ||
+            !videoUrl ||
+            !videoManifestUrl ||
+            !thumbnailUrl ||
+            !category ||
+            !type ||
+            !authorId
+        ) {
             throw createApiError('VIDEO_INVALID_INPUT', 'Missing required fields for creating a video.', 400);
         }
 
@@ -44,6 +54,7 @@ export async function POST(request) {
             title,
             videoUrl,
             videoManifestUrl,
+            thumbnailUrl,
             category,
             type,
             authorId,
@@ -78,6 +89,9 @@ export async function PUT(request) {
         }
         if (typeof body.videoManifestUrl === 'string') {
             updates.videoManifestUrl = sanitizeString(body.videoManifestUrl);
+        }
+        if (typeof body.thumbnailUrl === 'string') {
+            updates.thumbnailUrl = sanitizeString(body.thumbnailUrl);
         }
         if (typeof body.status === 'string') {
             updates.status = sanitizeString(body.status);

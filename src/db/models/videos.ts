@@ -9,6 +9,7 @@ export const VIDEO_COLLECTION = {
         title: 'title',
         videoUrl: 'video_url',
         videoManifestUrl: 'video_manifest_url',
+        thumbnailUrl: 'thumbnail_url',
         category: 'category',
         type: 'type',
         postWeekDay: 'post_week_day',
@@ -40,6 +41,7 @@ export interface VideoRecord {
     title: string;
     video_url: string;
     video_manifest_url: string;
+    thumbnail_url: string;
     category: string;
     type: string;
     post_week_day: FirestoreDateValue;
@@ -59,6 +61,7 @@ export interface Video {
     title: string;
     videoUrl: string;
     videoManifestUrl: string;
+    thumbnailUrl: string;
     category: VideoCategory;
     type: VideoType;
     postWeekDay: Date;
@@ -106,6 +109,7 @@ export const parseVideoRecord = (raw: VideoRecord): Video => ({
     title: raw.title ?? '',
     videoUrl: raw.video_url,
     videoManifestUrl: raw.video_manifest_url,
+    thumbnailUrl: raw.thumbnail_url ?? '',
     category: ensureEnumValue(raw.category, VIDEO_CATEGORY_VALUES, 'category'),
     type: ensureEnumValue(raw.type, VIDEO_TYPE_VALUES, 'type'),
     postWeekDay: normalizeDate(raw.post_week_day, 'post_week_day'),
@@ -138,6 +142,7 @@ export const serializeVideo = (video: Video): VideoRecord => ({
     title: video.title,
     video_url: video.videoUrl,
     video_manifest_url: video.videoManifestUrl,
+    thumbnail_url: video.thumbnailUrl,
     category: ensureEnumValue(video.category, VIDEO_CATEGORY_VALUES, 'category'),
     type: ensureEnumValue(video.type, VIDEO_TYPE_VALUES, 'type'),
     post_week_day: ensureDateInstance(video.postWeekDay, 'postWeekDay'),

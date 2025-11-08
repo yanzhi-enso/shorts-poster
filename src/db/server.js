@@ -104,7 +104,7 @@ export async function claimVideo(projectId, channelOwnerId, channelOwnerName) {
 /**
  * Update selected video fields by projectId.
  * @param {string} projectId
- * @param {Partial<Pick<import('db/models/videos').Video, 'videoUrl' | 'videoManifestUrl' | 'status'>>} updates
+ * @param {Partial<Pick<import('db/models/videos').Video, 'videoUrl' | 'videoManifestUrl' | 'thumbnailUrl' | 'status'>>} updates
  */
 export async function updateVideo(projectId, updates) {
     if (!projectId) {
@@ -126,6 +126,7 @@ export async function updateVideo(projectId, updates) {
             ...currentVideo,
             videoUrl: updates.videoUrl ?? currentVideo.videoUrl,
             videoManifestUrl: updates.videoManifestUrl ?? currentVideo.videoManifestUrl,
+            thumbnailUrl: updates.thumbnailUrl ?? currentVideo.thumbnailUrl,
             status: updates.status ?? currentVideo.status,
             modifiedAt: new Date(),
         };
