@@ -6,13 +6,16 @@ export const VIDEO_COLLECTION = {
     name: COLLECTIONS.POSTING_VIDEOS,
     fields: {
         projectId: 'project_id',
+        title: 'title',
         videoUrl: 'video_url',
         videoManifestUrl: 'video_manifest_url',
         category: 'category',
         type: 'type',
         postWeekDay: 'post_week_day',
         authorId: 'author_id',
+        authorName: 'author_name',
         channelOwnerId: 'channel_owner_id',
+        channelOwnerName: 'channel_owner_name',
         status: 'status',
         createdAt: 'created_at',
         modifiedAt: 'modified_at',
@@ -33,13 +36,16 @@ type FirestoreDateValue = Date | string | number | { toDate: () => Date };
 // raw db record
 export interface VideoRecord {
     project_id: string;
+    title: string;
     video_url: string;
     video_manifest_url: string;
     category: string;
     type: string;
     post_week_day: FirestoreDateValue;
     author_id: string;
+    author_name: string;
     channel_owner_id: string | null;
+    channel_owner_name: string | null;
     status: string;
     created_at: FirestoreDateValue;
     modified_at: FirestoreDateValue;
@@ -48,13 +54,16 @@ export interface VideoRecord {
 // normalized app model
 export interface Video {
     projectId: string;
+    title: string;
     videoUrl: string;
     videoManifestUrl: string;
     category: VideoCategory;
     type: VideoType;
     postWeekDay: Date;
     authorId: string;
+    authorName: string;
     channelOwnerId: string | null;
+    channelOwnerName: string | null;
     status: VideoStatus;
     createdAt: Date;
     modifiedAt: Date;
@@ -91,13 +100,16 @@ const ensureEnumValue = <T extends readonly string[]>(
 
 export const parseVideoRecord = (raw: VideoRecord): Video => ({
     projectId: raw.project_id,
+    title: raw.title,
     videoUrl: raw.video_url,
     videoManifestUrl: raw.video_manifest_url,
     category: ensureEnumValue(raw.category, VIDEO_CATEGORY_VALUES, 'category'),
     type: ensureEnumValue(raw.type, VIDEO_TYPE_VALUES, 'type'),
     postWeekDay: normalizeDate(raw.post_week_day, 'post_week_day'),
     authorId: raw.author_id,
-    channelOwnerId: raw.channel_owner_id,
+    authorName: raw.author_name,
+    channelOwnerId: raw.channel_owner_id ?? null,
+    channelOwnerName: raw.channel_owner_name ?? null,
     status: ensureEnumValue(raw.status, VIDEO_STATUS_VALUES, 'status'),
     createdAt: normalizeDate(raw.created_at, 'created_at'),
     modifiedAt: normalizeDate(raw.modified_at, 'modified_at'),
@@ -112,13 +124,16 @@ const ensureDateInstance = (value: Date, fieldName: string): Date => {
 
 export const serializeVideo = (video: Video): VideoRecord => ({
     project_id: video.projectId,
+    title: video.title,
     video_url: video.videoUrl,
     video_manifest_url: video.videoManifestUrl,
     category: ensureEnumValue(video.category, VIDEO_CATEGORY_VALUES, 'category'),
     type: ensureEnumValue(video.type, VIDEO_TYPE_VALUES, 'type'),
     post_week_day: ensureDateInstance(video.postWeekDay, 'postWeekDay'),
     author_id: video.authorId,
+    author_name: video.authorName,
     channel_owner_id: video.channelOwnerId,
+    channel_owner_name: video.channelOwnerName,
     status: ensureEnumValue(video.status, VIDEO_STATUS_VALUES, 'status'),
     created_at: ensureDateInstance(video.createdAt, 'createdAt'),
     modified_at: ensureDateInstance(video.modifiedAt, 'modifiedAt'),

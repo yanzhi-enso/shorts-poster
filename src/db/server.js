@@ -13,6 +13,7 @@ export async function createVideo(payload) {
     const video = {
         ...payload,
         channelOwnerId: payload.channelOwnerId ?? null,
+        channelOwnerName: payload.channelOwnerName ?? null,
         createdAt: payload.createdAt ?? now,
         modifiedAt: payload.modifiedAt ?? now,
     };
@@ -30,10 +31,11 @@ export async function createVideo(payload) {
  * Claim ownership of a video via transaction to avoid races.
  * @param {string} videoId
  * @param {string} channelOwnerId
+ * @param {string} channelOwnerName
  */
-export async function claimVideo(videoId, channelOwnerId) {
-    if (!videoId || !channelOwnerId) {
-        throw new Error('Both videoId and channelOwnerId are required to claim a video.');
+export async function claimVideo(videoId, channelOwnerId, channelOwnerName) {
+    if (!videoId || !channelOwnerId || !channelOwnerName) {
+        throw new Error('videoId, channelOwnerId and channelOwnerName are required to claim a video.');
     }
 
     const firestore = getServerFirestore();
@@ -59,6 +61,7 @@ export async function claimVideo(videoId, channelOwnerId) {
 
         const update = {
             channel_owner_id: channelOwnerId,
+            channel_owner_name: channelOwnerName,
             modified_at: new Date(),
         };
 
