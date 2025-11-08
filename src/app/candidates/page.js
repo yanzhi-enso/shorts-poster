@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import styles from './page.module.css';
 import StreamVideoPlayer from 'components/StreamVideoPlayer';
 import { VIDEO_CATEGORY_VALUES, VIDEO_TYPE_VALUES } from 'db/models/videos';
-import { listUnassignedVideos } from 'utils/backend';
+import { listUnassignedVideos } from 'db/client.js';
 
 const SelectionColumn = ({ category, onCategorySelect, type, onTypeSelect, onReset }) => (
     <div className={styles.column}>
