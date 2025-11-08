@@ -1,0 +1,124 @@
+export const COLLECTIONS = {
+    POSTING_VIDEOS:'posting-videos',
+};
+
+export const VIDEO_COLLECTION = {
+    name: COLLECTIONS.POSTING_VIDEOS,
+    fields: {
+        projectId: 'project_id',
+        videoUrl: 'video_url',
+        videoManifestUrl: 'video_manifest_url',
+        category: 'category',
+        type: 'type',
+        postWeekDay: 'post_week_day',
+        authorId: 'author_id',
+        channelOwnerId: 'channel_owner_id',
+        status: 'status',
+        createdAt: 'created_at',
+        modifiedAt: 'modified_at',
+    },
+} as const;
+
+const VIDEO_CATEGORY_VALUES = ['ib', 'cat', 'mermaid'] as const;
+const VIDEO_TYPE_VALUES = ['1min', 'shorts'] as const;
+const VIDEO_STATUS_VALUES = ['ready', 'revisioning'] as const;
+
+export type VideoCategory = (typeof VIDEO_CATEGORY_VALUES)[number];
+export type VideoType = (typeof VIDEO_TYPE_VALUES)[number];
+export type VideoStatus = (typeof VIDEO_STATUS_VALUES)[number];
+
+type FirestoreDateValue = Date | string | number | { toDate: () => Date };
+
+// raw db record
+export interface VideoRecord {
+    project_id: string;
+    video_url: string;
+    video_manifest_url: string;
+    category: string;
+    type: string;
+    post_week_day: FirestoreDateValue;
+    author_id: string;
+    channel_owner_id: string;
+    status: string;
+    created_at: FirestoreDateValue;
+    modified_at: FirestoreDateValue;
+}
+
+// normalized app model
+export interface Video {
+    projectId: string;
+    videoUrl: string;
+    videoManifestUrl: string;
+    category: VideoCategory;
+    type: VideoType;
+    postWeekDay: Date;
+    authorId: string;
+    channelOwnerId: string;
+    status: VideoStatus;
+    createdAt: Date;
+    modifiedAt: Date;
+}
+
+const normalizeDate = (value: FirestoreDateValue, fieldName: string): Date => {
+    if (value instanceof Date) {
+        return value;
+    }
+    if (typeof value === 'number') {
+        return new Date(value);
+    }
+    if (typeof value === 'string') {
+        const parsed = new Date(value);
+        if (!Number.isNaN(parsed.getTime())) {
+            return parsed;
+        }
+    } else if (value && typeof value.toDate === 'function') {
+        return value.toDate();
+    }
+    throw new Error(`Invalid ${fieldName} date value.`);
+};
+
+const ensureEnumValue = <T extends readonly string[]>(
+    value: string,
+    allowed: T,
+    fieldName: string,
+): T[number] => {
+    if (allowed.includes(value as T[number])) {
+        return value as T[number];
+    }
+    throw new Error(`Invalid ${fieldName} value "${value}".`);
+};
+
+export const parseVideoRecord = (raw: VideoRecord): Video => ({
+    projectId: raw.project_id,
+    videoUrl: raw.video_url,
+    videoManifestUrl: raw.video_manifest_url,
+    category: ensureEnumValue(raw.category, VIDEO_CATEGORY_VALUES, 'category'),
+    type: ensureEnumValue(raw.type, VIDEO_TYPE_VALUES, 'type'),
+    postWeekDay: normalizeDate(raw.post_week_day, 'post_week_day'),
+    authorId: raw.author_id,
+    channelOwnerId: raw.channel_owner_id,
+    status: ensureEnumValue(raw.status, VIDEO_STATUS_VALUES, 'status'),
+    createdAt: normalizeDate(raw.created_at, 'created_at'),
+    modifiedAt: normalizeDate(raw.modified_at, 'modified_at'),
+});
+
+const ensureDateInstance = (value: Date, fieldName: string): Date => {
+    if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
+        throw new Error(`Invalid ${fieldName} Date instance.`);
+    }
+    return value;
+};
+
+export const serializeVideo = (video: Video): VideoRecord => ({
+    project_id: video.projectId,
+    video_url: video.videoUrl,
+    video_manifest_url: video.videoManifestUrl,
+    category: ensureEnumValue(video.category, VIDEO_CATEGORY_VALUES, 'category'),
+    type: ensureEnumValue(video.type, VIDEO_TYPE_VALUES, 'type'),
+    post_week_day: ensureDateInstance(video.postWeekDay, 'postWeekDay'),
+    author_id: video.authorId,
+    channel_owner_id: video.channelOwnerId,
+    status: ensureEnumValue(video.status, VIDEO_STATUS_VALUES, 'status'),
+    created_at: ensureDateInstance(video.createdAt, 'createdAt'),
+    modified_at: ensureDateInstance(video.modifiedAt, 'modifiedAt'),
+});
