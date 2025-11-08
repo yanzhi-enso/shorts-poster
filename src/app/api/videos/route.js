@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createVideo, updateVideo, deleteVideo } from 'db/server.js';
+import { createVideo, updateVideo, deleteVideo, getVideo, VIDEO_ERROR_CODES } from 'db/server.js';
 import { getUserDisplayName } from 'services/firebase/auth/server.js';
 import { requireAuthUser, handleApiError, createApiError } from './utils';
 
@@ -125,5 +125,27 @@ export async function DELETE(request) {
         return NextResponse.json({ success: true });
     } catch (error) {
         return handleApiError(error, 'Failed to delete video.');
+    }
+}
+export async function GET(request) {
+    try {
+        await requireAuthUser(request);
+        const { searchParams } = new URL(request.url);
+        const projectId = searchParams.get('pid')
+        if (!projectId) {
+            throw createApiError('VIDEO_PROJECT_ID_REQUIRED', 'projectId (pid) is required to fetch a video.');
+        }
+
+        const video = await getVideo(projectId.trim(), { rejectIfClaimed: true });
+        return NextResponse.json({
+            projectId: video.projectId,
+            category: video.category,
+            type: video.type,
+            status: video.status,
+            channelOwnerId: video.channelOwnerId,
+            channelOwnerName: video.channelOwnerName,
+        });
+    } catch (error) {
+        return handleApiError(error, 'Failed to fetch video.');
     }
 }

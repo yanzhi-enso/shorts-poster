@@ -3,10 +3,20 @@ import { VIDEO_COLLECTION, parseVideoRecord, serializeVideo } from 'db/models/vi
 
 const collectionName = VIDEO_COLLECTION.name;
 
+export const VIDEO_ERROR_CODES = {
+    CLAIMED_IMMUTABLE: 'VIDEO_CLAIMED_IMMUTABLE',
+};
+
 const makeError = (code, message) => {
     const error = new Error(message);
     error.code = code;
     return error;
+};
+
+const ensureVideoUnclaimedData = (data) => {
+    if (data?.channel_owner_id) {
+        throw makeError(VIDEO_ERROR_CODES.CLAIMED_IMMUTABLE, 'Claimed videos cannot be modified.');
+    }
 };
 
 const getDocRef = (firestore, projectId) => firestore.collection(collectionName).doc(projectId);
@@ -121,7 +131,9 @@ export async function updateVideo(projectId, updates) {
             throw makeError('VIDEO_NOT_FOUND', 'Video not found.');
         }
 
-        const currentVideo = parseVideoRecord(snapshot.data());
+        const storedData = snapshot.data();
+        ensureVideoUnclaimedData(storedData);
+        const currentVideo = parseVideoRecord(storedData);
         const nextVideo = {
             ...currentVideo,
             videoUrl: updates.videoUrl ?? currentVideo.videoUrl,
@@ -152,12 +164,45 @@ export async function deleteVideo(projectId) {
 
     const firestore = getServerFirestore();
     const docRef = getDocRef(firestore, projectId);
-    const snapshot = await docRef.get();
+
+    await firestore.runTransaction(async (transaction) => {
+        const snapshot = await transaction.get(docRef);
+
+        if (!snapshot.exists) {
+            throw makeError('VIDEO_NOT_FOUND', 'Video not found.');
+        }
+
+        ensureVideoUnclaimedData(snapshot.data());
+        transaction.delete(docRef);
+    });
+    return true;
+}
+
+/**
+ * Fetch a video by projectId.
+ * @param {string} projectId
+ * @param {{ rejectIfClaimed?: boolean }} options
+ */
+export async function getVideo(projectId, { rejectIfClaimed = false } = {}) {
+    if (!projectId) {
+        throw makeError('VIDEO_PROJECT_ID_REQUIRED', 'projectId is required to fetch a video.');
+    }
+
+    const firestore = getServerFirestore();
+    const snapshot = await getDocRef(firestore, projectId).get();
 
     if (!snapshot.exists) {
         throw makeError('VIDEO_NOT_FOUND', 'Video not found.');
     }
 
-    await docRef.delete();
-    return true;
+    const video = {
+        id: projectId,
+        ...parseVideoRecord(snapshot.data()),
+    };
+
+    if (rejectIfClaimed && video.channelOwnerId) {
+        throw makeError(VIDEO_ERROR_CODES.CLAIMED_IMMUTABLE, 'Claimed videos cannot be modified.');
+    }
+
+    return video;
 }

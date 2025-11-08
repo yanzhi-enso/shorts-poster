@@ -10,6 +10,7 @@ const ERROR_STATUS_MAP = {
     VIDEO_NOT_FOUND: 404,
     VIDEO_ALREADY_EXISTS: 409,
     VIDEO_ALREADY_CLAIMED: 409,
+    VIDEO_CLAIMED_IMMUTABLE: 405,
 };
 
 export async function requireAuthUser(request) {
