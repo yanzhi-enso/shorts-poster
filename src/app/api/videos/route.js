@@ -34,17 +34,25 @@ export async function POST(request) {
         const type = sanitizeString(body.type);
         const authorId = sanitizeString(body.authorId) || null;
 
-        if (
-            !projectId ||
-            !title ||
-            !videoUrl ||
-            !videoManifestUrl ||
-            !thumbnailUrl ||
-            !category ||
-            !type ||
-            !authorId
-        ) {
-            throw createApiError('VIDEO_INVALID_INPUT', 'Missing required fields for creating a video.', 400);
+        const requiredFields = [
+            ['projectId', projectId],
+            ['title', title],
+            ['videoUrl', videoUrl],
+            ['videoManifestUrl', videoManifestUrl],
+            ['thumbnailUrl', thumbnailUrl],
+            ['category', category],
+            ['type', type],
+            ['authorId', authorId],
+        ];
+        const missingFieldEntry = requiredFields.find(([, value]) => !value);
+        if (missingFieldEntry) {
+            const [fieldName] = missingFieldEntry;
+            console.error(`Missing required field: ${fieldName}`);
+            throw createApiError(
+                'VIDEO_INVALID_INPUT',
+                `Missing required field: ${fieldName}.`,
+                400,
+            );
         }
 
         const authorName = await getUserDisplayName(authorId);
