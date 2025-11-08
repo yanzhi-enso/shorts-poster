@@ -26,8 +26,9 @@ export async function listUnassignedVideos({
     const constraints = [
         where(VIDEO_COLLECTION.fields.category, '==', category),
         where(VIDEO_COLLECTION.fields.type, '==', type),
+        where(VIDEO_COLLECTION.fields.status, '==', 'ready'),
         where(VIDEO_COLLECTION.fields.channelOwnerId, '==', null),
-        orderBy(VIDEO_COLLECTION.fields.createdAt, 'desc'),
+        orderBy(VIDEO_COLLECTION.fields.modifiedAt, 'desc'),
         limit(pageSize),
     ];
 
