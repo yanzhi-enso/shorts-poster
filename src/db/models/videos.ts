@@ -1,6 +1,6 @@
-export const COLLECTIONS = {
-    POSTING_VIDEOS:'posting-videos',
-};
+const COLLECTIONS = {
+    POSTING_VIDEOS: 'posting-videos',
+} as const;
 
 export const VIDEO_COLLECTION = {
     name: COLLECTIONS.POSTING_VIDEOS,
@@ -26,6 +26,7 @@ const VIDEO_STATUS_VALUES = ['ready', 'revisioning'] as const;
 export type VideoCategory = (typeof VIDEO_CATEGORY_VALUES)[number];
 export type VideoType = (typeof VIDEO_TYPE_VALUES)[number];
 export type VideoStatus = (typeof VIDEO_STATUS_VALUES)[number];
+export type VideoWithId = Video & { id: string };
 
 type FirestoreDateValue = Date | string | number | { toDate: () => Date };
 
@@ -38,7 +39,7 @@ export interface VideoRecord {
     type: string;
     post_week_day: FirestoreDateValue;
     author_id: string;
-    channel_owner_id: string;
+    channel_owner_id: string | null;
     status: string;
     created_at: FirestoreDateValue;
     modified_at: FirestoreDateValue;
@@ -53,7 +54,7 @@ export interface Video {
     type: VideoType;
     postWeekDay: Date;
     authorId: string;
-    channelOwnerId: string;
+    channelOwnerId: string | null;
     status: VideoStatus;
     createdAt: Date;
     modifiedAt: Date;
