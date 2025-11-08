@@ -24,9 +24,9 @@ export const VIDEO_COLLECTION = {
     },
 } as const;
 
-const VIDEO_CATEGORY_VALUES = ['ib', 'cat', 'mermaid'] as const;
-const VIDEO_TYPE_VALUES = ['1min', 'shorts'] as const;
-const VIDEO_STATUS_VALUES = ['ready', 'revisioning'] as const;
+export const VIDEO_CATEGORY_VALUES = ['ib', 'cat', 'mermaid'] as const;
+export const VIDEO_TYPE_VALUES = ['1min', 'shorts'] as const;
+export const VIDEO_STATUS_VALUES = ['ready', 'revisioning'] as const;
 
 export type VideoCategory = (typeof VIDEO_CATEGORY_VALUES)[number];
 export type VideoType = (typeof VIDEO_TYPE_VALUES)[number];
