@@ -1,0 +1,54 @@
+import { collection, getDocs, limit, orderBy, query, startAfter, where } from 'firebase/firestore';
+import { db } from 'services/firebase/firestore/client.js';
+import { VIDEO_COLLECTION, parseVideoRecord } from 'db/models/videos';
+
+const DEFAULT_PAGE_SIZE = 20;
+
+/**
+ * Retrieve paginated videos filtered by category, type and availability.
+ * @param {Object} params
+ * @param {import('db/models/videos').VideoCategory} params.category
+ * @param {import('db/models/videos').VideoType} params.type
+ * @param {number} [params.pageSize=DEFAULT_PAGE_SIZE]
+ * @param {import('firebase/firestore').DocumentSnapshot} [params.cursor]
+ * @returns {Promise<{videos: import('db/models/videos').VideoWithId[], cursor: import('firebase/firestore').DocumentSnapshot | null, hasMore: boolean}>}
+ */
+export async function listUnassignedVideos({
+    category,
+    type,
+    pageSize = DEFAULT_PAGE_SIZE,
+    cursor = undefined,
+}) {
+    if (!category || !type) {
+        throw new Error('Both category and type are required to list videos.');
+    }
+
+    const constraints = [
+        where(VIDEO_COLLECTION.fields.category, '==', category),
+        where(VIDEO_COLLECTION.fields.type, '==', type),
+        where(VIDEO_COLLECTION.fields.channelOwnerId, '==', null),
+        orderBy(VIDEO_COLLECTION.fields.createdAt, 'desc'),
+        limit(pageSize),
+    ];
+
+    if (cursor) {
+        constraints.push(startAfter(cursor));
+    }
+
+    // Requires composite index: category ASC, type ASC, channel_owner_id ASC, created_at DESC
+    const videoQuery = query(collection(db, VIDEO_COLLECTION.name), ...constraints);
+    const snapshot = await getDocs(videoQuery);
+
+    const videos = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...parseVideoRecord(doc.data()),
+    }));
+    const hasMore = snapshot.docs.length === pageSize;
+    const nextCursor = hasMore ? snapshot.docs[snapshot.docs.length - 1] : null;
+
+    return {
+        videos,
+        cursor: nextCursor,
+        hasMore,
+    };
+}
