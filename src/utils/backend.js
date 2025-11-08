@@ -1,5 +1,6 @@
 const API_BASE = '/api/videos';
 
+
 const jsonHeaders = (token) => ({
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -30,4 +31,3 @@ export async function claimVideoRecord(token, projectId) {
     });
     return handleResponse(response);
 }
-
