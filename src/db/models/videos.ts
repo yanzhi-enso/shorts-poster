@@ -16,6 +16,7 @@ export const VIDEO_COLLECTION = {
         authorName: 'author_name',
         channelOwnerId: 'channel_owner_id',
         channelOwnerName: 'channel_owner_name',
+        claimTime: 'claim_time',
         status: 'status',
         createdAt: 'created_at',
         modifiedAt: 'modified_at',
@@ -46,6 +47,7 @@ export interface VideoRecord {
     author_name: string;
     channel_owner_id: string | null;
     channel_owner_name: string | null;
+    claim_time: FirestoreDateValue | null;
     status: string;
     created_at: FirestoreDateValue;
     modified_at: FirestoreDateValue;
@@ -64,6 +66,7 @@ export interface Video {
     authorName: string;
     channelOwnerId: string | null;
     channelOwnerName: string | null;
+    claimTime: Date | null;
     status: VideoStatus;
     createdAt: Date;
     modifiedAt: Date;
@@ -100,7 +103,7 @@ const ensureEnumValue = <T extends readonly string[]>(
 
 export const parseVideoRecord = (raw: VideoRecord): Video => ({
     projectId: raw.project_id,
-    title: raw.title,
+    title: raw.title ?? '',
     videoUrl: raw.video_url,
     videoManifestUrl: raw.video_manifest_url,
     category: ensureEnumValue(raw.category, VIDEO_CATEGORY_VALUES, 'category'),
@@ -110,6 +113,7 @@ export const parseVideoRecord = (raw: VideoRecord): Video => ({
     authorName: raw.author_name,
     channelOwnerId: raw.channel_owner_id ?? null,
     channelOwnerName: raw.channel_owner_name ?? null,
+    claimTime: raw.claim_time ? normalizeDate(raw.claim_time, 'claim_time') : null,
     status: ensureEnumValue(raw.status, VIDEO_STATUS_VALUES, 'status'),
     createdAt: normalizeDate(raw.created_at, 'created_at'),
     modifiedAt: normalizeDate(raw.modified_at, 'modified_at'),
@@ -120,6 +124,13 @@ const ensureDateInstance = (value: Date, fieldName: string): Date => {
         throw new Error(`Invalid ${fieldName} Date instance.`);
     }
     return value;
+};
+
+const ensureOptionalDateInstance = (value: Date | null, fieldName: string): Date | null => {
+    if (value === null) {
+        return null;
+    }
+    return ensureDateInstance(value, fieldName);
 };
 
 export const serializeVideo = (video: Video): VideoRecord => ({
@@ -134,6 +145,7 @@ export const serializeVideo = (video: Video): VideoRecord => ({
     author_name: video.authorName,
     channel_owner_id: video.channelOwnerId,
     channel_owner_name: video.channelOwnerName,
+    claim_time: ensureOptionalDateInstance(video.claimTime, 'claimTime'),
     status: ensureEnumValue(video.status, VIDEO_STATUS_VALUES, 'status'),
     created_at: ensureDateInstance(video.createdAt, 'createdAt'),
     modified_at: ensureDateInstance(video.modifiedAt, 'modifiedAt'),
