@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth } from '@/authManager/authContext';
+import { useAuth } from 'authManager/authContext';
 import styles from './page.module.css';
 
 export default function Home() {
