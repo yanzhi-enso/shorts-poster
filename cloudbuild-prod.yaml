@@ -1,0 +1,65 @@
+# Specify the Cloud Build service account
+serviceAccount: 'projects/pure-lantern-394915/serviceAccounts/cloud-build@pure-lantern-394915.iam.gserviceaccount.com'
+
+steps:
+  # Step 1: Build and push Docker image with build-time secrets (with debug)
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        BUILD_VERSION="$${COMMIT_SHA}"
+        if [ -z "$$BUILD_VERSION" ]; then
+          BUILD_VERSION="$${BUILD_ID}"
+        fi
+        docker build \
+          --build-arg FIREBASE_API_KEY="$$FIREBASE_KEY" \
+          --build-arg BUILD_VERSION="$$BUILD_VERSION" \
+          --tag gcr.io/$PROJECT_ID/shorts-hub:$BUILD_ID \
+          --tag gcr.io/$PROJECT_ID/shorts-hub:latest \
+          .
+    id: 'build-image'
+    secretEnv: ['FIREBASE_KEY']
+
+  # Step 2: Push the Docker image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/shorts-hub:$BUILD_ID'
+    id: 'push-image'
+    waitFor: ['build-image']
+
+  # Step 3: Deploy to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'shorts-hub'
+      - '--image=gcr.io/$PROJECT_ID/shorts-hub:$BUILD_ID'
+      - '--region=us-west1'
+      - '--service-account=shorts-factory-sa@pure-lantern-394915.iam.gserviceaccount.com'
+      - '--set-secrets=GOOGLE_OAUTH_CLIENT_KEY=shorts-factory-google-oauth:latest'
+      - '--allow-unauthenticated'
+    id: 'deploy-service'
+    waitFor: ['push-image']
+
+# Build configuration
+options:
+  # Enable logging
+  logging: CLOUD_LOGGING_ONLY
+  # Set machine type for build (optional, can be adjusted based on build requirements)
+  machineType: 'E2_HIGHCPU_8'
+
+# Configure access to secrets
+availableSecrets:
+  secretManager:
+  - versionName: projects/pure-lantern-394915/secrets/firebase-api-key/versions/latest
+    env: 'FIREBASE_KEY'
+
+# Timeout for the entire build (30 minutes)
+timeout: '1200s'
+
+# Specify which images to store in Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/shorts-factory:$BUILD_ID'
+  - 'gcr.io/$PROJECT_ID/shorts-factory:latest'
