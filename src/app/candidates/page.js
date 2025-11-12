@@ -75,6 +75,23 @@ export default function CandidatesPage() {
         setActiveVideo(null);
     }, []);
 
+    const handleClaimSuccess = useCallback(
+        (claimedVideo) => {
+            if (!claimedVideo) {
+                return;
+            }
+            const targetId = claimedVideo.id ?? claimedVideo.projectId;
+            setVideos((prev) =>
+                prev.filter(
+                    (candidate) =>
+                        candidate.id !== targetId && candidate.projectId !== targetId,
+                ),
+            );
+            setActiveVideo(null);
+        },
+        [setVideos, setActiveVideo],
+    );
+
     return (
         <div className={styles.container}>
             <div className={styles.header}>
@@ -101,7 +118,11 @@ export default function CandidatesPage() {
                 />
             </div>
 
-            <FullscreenPlayer video={activeVideo} onClose={handleCloseVideo} />
+            <FullscreenPlayer
+                video={activeVideo}
+                onClose={handleCloseVideo}
+                onClaimSuccess={handleClaimSuccess}
+            />
         </div>
     );
 }
