@@ -1,5 +1,6 @@
 import { collection, getDocs, limit, orderBy, query, startAfter, where } from 'firebase/firestore';
 import { db } from 'services/firebase/firestore/client.js';
+import { COLLECTION_VIDEOS } from 'services/firebase/firestore/common.js';
 import { VIDEO_COLLECTION, VIDEO_STATUS, parseVideoRecord } from 'db/models/videos';
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -38,7 +39,7 @@ export async function listUnassignedVideos({
     }
 
     // Requires composite index: category ASC, type ASC, status ASC, modified_at DESC
-    const videoQuery = query(collection(db, VIDEO_COLLECTION.name), ...constraints);
+    const videoQuery = query(collection(db, COLLECTION_VIDEOS), ...constraints);
     const snapshot = await getDocs(videoQuery);
 
     const videos = snapshot.docs.map((doc) => ({

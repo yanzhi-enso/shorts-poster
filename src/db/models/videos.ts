@@ -1,9 +1,7 @@
-const COLLECTIONS = {
-    POSTING_VIDEOS: 'posting-videos',
-} as const;
+import { COLLECTION_VIDEOS } from 'services/firebase/firestore/common.js';
 
 export const VIDEO_COLLECTION = {
-    name: COLLECTIONS.POSTING_VIDEOS,
+    name: COLLECTION_VIDEOS,
     fields: {
         projectId: 'project_id',
         title: 'title',
