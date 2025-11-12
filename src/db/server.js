@@ -44,7 +44,7 @@ export async function createVideo(payload) {
         ...payload,
         channelOwnerId: payload.channelOwnerId ?? null,
         channelOwnerName: payload.channelOwnerName ?? null,
-        claimTime: payload.claimTime ?? null,
+        claimedAt: payload.claimedAt ?? null,
         createdAt: payload.createdAt ?? now,
         modifiedAt: payload.modifiedAt ?? now,
     };
