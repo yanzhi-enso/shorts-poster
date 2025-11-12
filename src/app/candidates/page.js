@@ -80,8 +80,7 @@ export default function CandidatesPage() {
             <div className={styles.header}>
                 <h1 className={styles.title}>Video Candidates</h1>
                 <p className={styles.subtitle}>
-                    Choose a preset, browse the Google Drive-style grid, and pop any video into a
-                    fullscreen review.
+                    Choose a preset and tap any video into a fullscreen review.
                 </p>
             </div>
 
