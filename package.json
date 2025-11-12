@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "playground": "tsx scripts/playground.js"
   },
   "dependencies": {
     "@google-cloud/firestore": "^8.0.0",
@@ -24,6 +25,7 @@
     "@types/react": "19.2.2",
     "dotenv": "^17.2.3",
     "eslint": "^9",
-    "eslint-config-next": "15.4.6"
+    "eslint-config-next": "15.4.6",
+    "tsx": "^4.20.6"
   }
 }
