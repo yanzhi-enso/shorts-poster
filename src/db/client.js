@@ -30,7 +30,7 @@ export async function listUnassignedVideos({
         // ready means it's ready to be claimed
         // as for claimed video, the status will be 'claimed'
         where(VIDEO_COLLECTION.fields.status, '==', VIDEO_STATUS.READY),
-        orderBy(VIDEO_COLLECTION.fields.modifiedAt, 'desc'),
+        orderBy(VIDEO_COLLECTION.fields.postWeekDay, 'desc'),
         limit(pageSize),
     ];
 
