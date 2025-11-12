@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createVideo, updateVideo, deleteVideo, getVideo, VIDEO_ERROR_CODES } from 'db/server.js';
+import { createVideo, updateVideo, deleteVideo, getVideo } from 'db/server.js';
+import { VIDEO_STATUS } from 'db/models/videos';
 import { getUserDisplayName } from 'services/firebase/auth/server.js';
 import { requireAuthUser, handleApiError, createApiError } from './utils';
 
@@ -51,7 +52,7 @@ export async function POST(request) {
             throw createApiError(
                 'VIDEO_INVALID_INPUT',
                 `Missing required field: ${fieldName}.`,
-                400,
+                400
             );
         }
 
@@ -70,7 +71,7 @@ export async function POST(request) {
             channelOwnerId: null,
             channelOwnerName: null,
             postWeekDay: computeWeekMonday(now),
-            status: 'ready',
+            status: VIDEO_STATUS.READY,
             createdAt: now,
             modifiedAt: now,
             claimTime: null,

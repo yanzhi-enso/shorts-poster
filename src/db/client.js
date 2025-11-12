@@ -1,6 +1,6 @@
 import { collection, getDocs, limit, orderBy, query, startAfter, where } from 'firebase/firestore';
 import { db } from 'services/firebase/firestore/client.js';
-import { VIDEO_COLLECTION, parseVideoRecord } from 'db/models/videos';
+import { VIDEO_COLLECTION, VIDEO_STATUS, parseVideoRecord } from 'db/models/videos';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -26,8 +26,9 @@ export async function listUnassignedVideos({
     const constraints = [
         where(VIDEO_COLLECTION.fields.category, '==', category),
         where(VIDEO_COLLECTION.fields.type, '==', type),
-        where(VIDEO_COLLECTION.fields.status, '==', 'ready'),
-        where(VIDEO_COLLECTION.fields.channelOwnerId, '==', null),
+        // ready means it's ready to be claimed
+        // as for claimed video, the status will be 'claimed'
+        where(VIDEO_COLLECTION.fields.status, '==', VIDEO_STATUS.READY),
         orderBy(VIDEO_COLLECTION.fields.modifiedAt, 'desc'),
         limit(pageSize),
     ];
@@ -36,7 +37,7 @@ export async function listUnassignedVideos({
         constraints.push(startAfter(cursor));
     }
 
-    // Requires composite index: category ASC, type ASC, channel_owner_id ASC, created_at DESC
+    // Requires composite index: category ASC, type ASC, status ASC, modified_at DESC
     const videoQuery = query(collection(db, VIDEO_COLLECTION.name), ...constraints);
     const snapshot = await getDocs(videoQuery);
 

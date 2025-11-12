@@ -1,5 +1,5 @@
 import { getServerFirestore } from 'services/firebase/firestore/server.js';
-import { VIDEO_COLLECTION, parseVideoRecord, serializeVideo } from 'db/models/videos';
+import { VIDEO_COLLECTION, VIDEO_STATUS, parseVideoRecord, serializeVideo } from 'db/models/videos';
 
 const collectionName = VIDEO_COLLECTION.name;
 
@@ -96,6 +96,7 @@ export async function claimVideo(projectId, channelOwnerId, channelOwnerName) {
             channel_owner_id: channelOwnerId,
             channel_owner_name: channelOwnerName,
             claim_time: now,
+            status: VIDEO_STATUS.CLAIMED,
             modified_at: now,
         };
 
