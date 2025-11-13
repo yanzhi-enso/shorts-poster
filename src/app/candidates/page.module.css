@@ -34,7 +34,7 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(220px, 280px) 1fr;
+  grid-template-columns: 300px 1fr;
   gap: 1.5rem;
 }
 

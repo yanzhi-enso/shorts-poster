@@ -20,7 +20,9 @@ const VideoFolders = ({
 
         {!canQuery && (
             <div className={styles.emptyState}>
-                <p>Select a production lane on the left to start browsing.</p>
+                <div className={styles.emptyStateText}>
+                    <p>Select a production lane on the left to start browsing.</p>
+                </div>
             </div>
         )}
 

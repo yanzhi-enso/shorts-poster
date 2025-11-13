@@ -44,6 +44,7 @@
   padding-right: 0.25rem;
   align-items: start;
   align-content: start;
+  padding-top: 3px; /* for hover effect visibility */
 }
 
 .grid > * {
@@ -100,14 +101,20 @@
 }
 
 .emptyState {
-  border: 1px dashed var(--color-container-border);
   border-radius: 14px;
   padding: 1.5rem;
-  text-align: center;
-  color: var(--color-muted-text);
-  margin-bottom: 1rem;
+  padding-bottom: 7.5rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.emptyStateText {
+  font-size: 1.5rem;
+  color: var(--color-muted-text);
+  margin: 0 auto;
+}
 
 @media (max-width: 768px) {
   .container {
