@@ -1,13 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import withAuth from 'authManager/withAuth';
 import styles from './page.module.css';
 import { countUnassignedVideos, listUnassignedVideos } from 'db/client.js';
 import { VideoCatalog, VIDEO_ENTRY_KEY_MAP } from 'components/videoViewer/VideoCatalog';
 import VideoList from 'components/videoViewer/VideoList';
 import FullscreenPlayer from 'components/videoViewer/FullscreenPlayer';
 
-export default function CandidatesPage() {
+export default withAuth(function CandidatesPage() {
     const [selectedFilter, setSelectedFilter] = useState(null);
     const [videos, setVideos] = useState([]);
     const [cursor, setCursor] = useState(null);
@@ -174,4 +175,4 @@ export default function CandidatesPage() {
             />
         </div>
     );
-}
+});
