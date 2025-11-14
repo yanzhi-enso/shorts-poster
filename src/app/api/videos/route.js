@@ -74,7 +74,7 @@ export async function POST(request) {
             status: VIDEO_STATUS.READY,
             createdAt: now,
             modifiedAt: now,
-            claimTime: null,
+            claimedAt: null,
         });
 
         return NextResponse.json({ video }, { status: 201 });

@@ -1,7 +1,8 @@
 import { getServerFirestore } from 'services/firebase/firestore/server.js';
+import { COLLECTION_VIDEOS } from 'services/firebase/firestore/common.js';
 import { VIDEO_COLLECTION, VIDEO_STATUS, parseVideoRecord, serializeVideo } from 'db/models/videos';
 
-const collectionName = VIDEO_COLLECTION.name;
+const collectionName = COLLECTION_VIDEOS;
 
 export const VIDEO_ERROR_CODES = {
     CLAIMED_IMMUTABLE: 'VIDEO_CLAIMED_IMMUTABLE',
@@ -43,7 +44,7 @@ export async function createVideo(payload) {
         ...payload,
         channelOwnerId: payload.channelOwnerId ?? null,
         channelOwnerName: payload.channelOwnerName ?? null,
-        claimTime: payload.claimTime ?? null,
+        claimedAt: payload.claimedAt ?? null,
         createdAt: payload.createdAt ?? now,
         modifiedAt: payload.modifiedAt ?? now,
     };
