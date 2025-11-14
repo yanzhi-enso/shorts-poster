@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styles from './page.module.css';
 import { countUnassignedVideos, listUnassignedVideos } from 'db/client.js';
-import { VideoCatalog, VIDEO_ENTRY_KEY_MAP } from 'components/candidates/VideoCatalog';
-import VideoList from 'components/candidates/VideoList';
-import FullscreenPlayer from 'components/candidates/FullscreenPlayer';
+import { VideoCatalog, VIDEO_ENTRY_KEY_MAP } from 'components/videoViewer/VideoCatalog';
+import VideoList from 'components/videoViewer/VideoList';
+import FullscreenPlayer from 'components/videoViewer/FullscreenPlayer';
 
 export default function CandidatesPage() {
     const [selectedFilter, setSelectedFilter] = useState(null);
