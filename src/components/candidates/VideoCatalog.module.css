@@ -1,12 +1,11 @@
 .container {
-  border: 1px solid var(--color-container-border);
-  border-radius: 16px;
-  background: var(--color-container-bg);
   padding: 1.5rem 1.25rem;
   display: flex;
   flex-direction: column;
   height: 100%;
   gap: 1rem;
+  border-right: 1px solid var(--color-container-border);
+  overflow-y: auto;
 }
 
 .header {
@@ -55,7 +54,7 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.45rem;
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
 }
 
@@ -84,4 +83,27 @@
 .listItemDescription {
   font-size: 0.85rem;
   color: var(--color-muted-text);
+}
+
+.listItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.countBadge {
+  min-width: 2.5rem;
+  text-align: center;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: rgba(76, 110, 245, 0.15);
+  color: var(--color-accent);
+}
+
+.listItemActive .countBadge {
+  background: rgba(255, 255, 255, 0.18);
+  color: inherit;
 }

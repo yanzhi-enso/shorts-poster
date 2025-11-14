@@ -5,11 +5,15 @@
 }
 
 .container {
+  position: relative;
   padding: 2rem;
   min-height: calc(100vh - 4rem);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  overflow: hidden;
+  height: 100vh;
+  padding-bottom: 54px; /* footer 30px + gap 24px */
 }
 
 .header {
@@ -34,8 +38,13 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(220px, 280px) 1fr;
+  grid-template-columns: 300px 1fr;
   gap: 1.5rem;
+
+  border: 1px solid var(--color-container-border);
+  border-radius: 16px;
+  background-color: var(--color-container-bg);
+  overflow: hidden;
 }
 
 @media (max-width: 1024px) {

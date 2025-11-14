@@ -1,4 +1,13 @@
-import { collection, getDocs, limit, orderBy, query, startAfter, where } from 'firebase/firestore';
+import {
+    collection,
+    getCountFromServer,
+    getDocs,
+    limit,
+    orderBy,
+    query,
+    startAfter,
+    where,
+} from 'firebase/firestore';
 import { db } from 'services/firebase/firestore/client.js';
 import { COLLECTION_VIDEOS } from 'services/firebase/firestore/common.js';
 import { VIDEO_COLLECTION, VIDEO_STATUS, parseVideoRecord } from 'db/models/videos';
@@ -54,4 +63,29 @@ export async function listUnassignedVideos({
         cursor: nextCursor,
         hasMore,
     };
+}
+
+/**
+ * Count how many unassigned videos match a given category and type.
+ * Keeps the UI in sync with the total number of claimable videos.
+ * @param {Object} params
+ * @param {import('db/models/videos').VideoCategory} params.category
+ * @param {import('db/models/videos').VideoType} params.type
+ * @returns {Promise<number>}
+ */
+export async function countUnassignedVideos({ category, type }) {
+    if (!category || !type) {
+        throw new Error('Both category and type are required to count videos.');
+    }
+
+    const constraints = [
+        where(VIDEO_COLLECTION.fields.category, '==', category),
+        where(VIDEO_COLLECTION.fields.type, '==', type),
+        where(VIDEO_COLLECTION.fields.status, '==', VIDEO_STATUS.READY),
+    ];
+
+    const baseQuery = query(collection(db, COLLECTION_VIDEOS), ...constraints);
+    const snapshot = await getCountFromServer(baseQuery);
+
+    return snapshot.data().count ?? 0;
 }

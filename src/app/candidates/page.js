@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import styles from './page.module.css';
-import { listUnassignedVideos } from 'db/client.js';
-import VideoFileList from 'components/candidates/VideoFileList';
-import VideoFolders from 'components/candidates/VideoFolders';
+import { countUnassignedVideos, listUnassignedVideos } from 'db/client.js';
+import { VideoCatalog, VIDEO_ENTRY_KEY_MAP } from 'components/candidates/VideoCatalog';
+import VideoList from 'components/candidates/VideoList';
 import FullscreenPlayer from 'components/candidates/FullscreenPlayer';
 
 export default function CandidatesPage() {
@@ -15,6 +15,8 @@ export default function CandidatesPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [activeVideo, setActiveVideo] = useState(null);
+    const [countsByFilter, setCountsByFilter] = useState({});
+    const [countsLoading, setCountsLoading] = useState(false);
 
     const selectedCategory = selectedFilter?.category ?? null;
     const selectedType = selectedFilter?.type ?? null;
@@ -36,6 +38,24 @@ export default function CandidatesPage() {
                     type: selectedType,
                     cursor: reset ? undefined : cursor,
                 });
+
+                // debug code
+                if (result.videos.length === 0 && reset) {
+                    setVideos([]);
+                } else {
+                    // duplicate some videos for testing, x 10
+                    const extendedVideos = [];
+                    for (let i = 0; i < 10; i++) {
+                        extendedVideos.push(
+                            ...result.videos.map((video) => ({
+                                ...video,
+                                id: `${video.id}_dup${i}`,
+                            })),
+                        );
+                    }
+                    result.videos = extendedVideos; 
+                }
+                //debug code end
 
                 setVideos((prev) => (reset ? result.videos : [...prev, ...result.videos]));
                 setCursor(result.cursor ?? null);
@@ -61,6 +81,39 @@ export default function CandidatesPage() {
         fetchVideos({ reset: true });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedCategory, selectedType]);
+
+    const fetchCounts = useCallback(async () => {
+        setCountsLoading(true);
+        try {
+            const entries = await Promise.all(
+                VIDEO_ENTRY_KEY_MAP.map(async (filter) => {
+                    try {
+                        const total = await countUnassignedVideos({
+                            category: filter.category,
+                            type: filter.type,
+                        });
+                        return [filter.id, total];
+                    } catch (err) {
+                        console.error(
+                            'Failed to count videos for filter',
+                            filter.id,
+                            err,
+                        );
+                        return [filter.id, 0];
+                    }
+                }),
+            );
+            setCountsByFilter(Object.fromEntries(entries));
+        } catch (err) {
+            console.error('Failed to fetch video counts', err);
+        } finally {
+            setCountsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchCounts();
+    }, [fetchCounts]);
 
     const handleSelectFilter = useCallback((filter) => {
         setSelectedFilter(filter);
@@ -88,8 +141,9 @@ export default function CandidatesPage() {
                 ),
             );
             setActiveVideo(null);
+            fetchCounts();
         },
-        [setVideos, setActiveVideo],
+        [setVideos, setActiveVideo, fetchCounts],
     );
 
     return (
@@ -102,12 +156,14 @@ export default function CandidatesPage() {
             </div>
 
             <div className={styles.layout}>
-                <VideoFileList
+                <VideoCatalog
                     selectedFilterId={selectedFilter?.id ?? null}
                     onSelect={handleSelectFilter}
+                    counts={countsByFilter}
+                    countsLoading={countsLoading}
                 />
 
-                <VideoFolders
+                <VideoList
                     videos={videos}
                     loading={loading}
                     error={error}
