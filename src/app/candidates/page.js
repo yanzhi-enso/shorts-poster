@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styles from './page.module.css';
 import { countUnassignedVideos, listUnassignedVideos } from 'db/client.js';
 import { VideoCatalog, VIDEO_ENTRY_KEY_MAP } from 'components/candidates/VideoCatalog';
@@ -17,6 +17,7 @@ export default function CandidatesPage() {
     const [activeVideo, setActiveVideo] = useState(null);
     const [countsByFilter, setCountsByFilter] = useState({});
     const [countsLoading, setCountsLoading] = useState(false);
+    const loadMoreInFlightRef = useRef(false);
 
     const selectedCategory = selectedFilter?.category ?? null;
     const selectedType = selectedFilter?.type ?? null;
@@ -39,24 +40,6 @@ export default function CandidatesPage() {
                     cursor: reset ? undefined : cursor,
                 });
 
-                // debug code
-                if (result.videos.length === 0 && reset) {
-                    setVideos([]);
-                } else {
-                    // duplicate some videos for testing, x 10
-                    const extendedVideos = [];
-                    for (let i = 0; i < 10; i++) {
-                        extendedVideos.push(
-                            ...result.videos.map((video) => ({
-                                ...video,
-                                id: `${video.id}_dup${i}`,
-                            })),
-                        );
-                    }
-                    result.videos = extendedVideos; 
-                }
-                //debug code end
-
                 setVideos((prev) => (reset ? result.videos : [...prev, ...result.videos]));
                 setCursor(result.cursor ?? null);
                 setHasMore(result.hasMore);
@@ -69,6 +52,16 @@ export default function CandidatesPage() {
         },
         [canQuery, selectedCategory, selectedType, cursor],
     );
+
+    const handleLoadMore = useCallback(() => {
+        if (loadMoreInFlightRef.current) {
+            return;
+        }
+        loadMoreInFlightRef.current = true;
+        fetchVideos({ reset: false }).finally(() => {
+            loadMoreInFlightRef.current = false;
+        });
+    }, [fetchVideos]);
 
     useEffect(() => {
         if (!canQuery) {
@@ -168,7 +161,7 @@ export default function CandidatesPage() {
                     loading={loading}
                     error={error}
                     hasMore={hasMore}
-                    onLoadMore={() => fetchVideos({ reset: false })}
+                    onLoadMore={handleLoadMore}
                     onSelect={handleOpenVideo}
                     canQuery={canQuery}
                 />

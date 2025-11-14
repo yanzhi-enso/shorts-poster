@@ -1,5 +1,6 @@
 'use client';
 
+import LoadMore from 'components/common/LoadMore';
 import VideoFileBlock from './VideoFileBlock';
 import styles from './VideoList.module.css';
 
@@ -45,22 +46,21 @@ export default function VideoList({
                                     onClick={() => onSelect(video)}
                                 />
                             ))}
+                            {loading && (
+                                <div
+                                    className={`${styles.loadingMore} ${styles.gridFullWidth}`}
+                                    role="status"
+                                >
+                                    Loading more…
+                                </div>
+                            )}
+                            <LoadMore
+                                onLoadMore={onLoadMore}
+                                disabled={!hasMore}
+                                isLoading={loading}
+                                className={styles.gridFullWidth}
+                            />
                         </div>
-                    )}
-                    {loading && videos.length > 0 && (
-                        <div className={styles.loadingMore} role="status">
-                            Loading more…
-                        </div>
-                    )}
-                    {hasMore && (
-                        <button
-                            type="button"
-                            className={styles.loadMore}
-                            onClick={onLoadMore}
-                            disabled={loading}
-                        >
-                            Load more
-                        </button>
                     )}
                 </>
             )}
