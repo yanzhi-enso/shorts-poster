@@ -31,7 +31,7 @@ export default withAuth(function Home() {
                     <p className={styles.statusSubtext}>
                         Continue managing videos by heading to the Shorts Candidate dashboard.
                     </p>
-                    <Link href="/shorts-candidate" className={styles.primaryButton}>
+                    <Link href="/candidates" className={styles.primaryButton}>
                         Open Shorts Candidate
                     </Link>
                 </div>
