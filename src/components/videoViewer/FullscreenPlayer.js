@@ -1,10 +1,14 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useState } from 'react';
-import StreamVideoPlayer from 'components/StreamVideoPlayer';
 import { getIdToken } from 'services/firebase/auth/client.js';
 import { claimVideoRecord } from 'utils/backend.js';
 import styles from './FullscreenPlayer.module.css';
+
+const StreamVideoPlayer = dynamic(() => import('components/common/StreamVideoPlayer'), {
+    ssr: false,
+});
 
 const ensureDownloadExtension = (filename) =>
     /\.[a-z0-9]+$/i.test(filename) ? filename : `${filename}.mp4`;
