@@ -61,5 +61,5 @@ timeout: '1200s'
 
 # Specify which images to store in Container Registry
 images:
-  - 'gcr.io/$PROJECT_ID/shorts-factory:$BUILD_ID'
-  - 'gcr.io/$PROJECT_ID/shorts-factory:latest'
+  - 'gcr.io/$PROJECT_ID/shorts-hub:$BUILD_ID'
+  - 'gcr.io/$PROJECT_ID/shorts-hub:latest'
