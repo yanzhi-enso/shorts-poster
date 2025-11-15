@@ -1,5 +1,6 @@
 'use client';
 
+import { VIDEO_STATUS } from 'db/models/videos';
 import styles from './VideoFileBlock.module.css';
 
 const formatDate = (value) => {
@@ -13,17 +14,27 @@ const formatDate = (value) => {
     return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(date);
 };
 
-const VideoFileBlock = ({ video, onClick }) => {
+const VideoFileBlock = ({ video, onClick, highlightStatus = false }) => {
     const displayName = video.title || video.projectId || 'Untitled';
     const createdAtLabel = formatDate(video.createdAt);
     const createdAtIso =
         video.createdAt instanceof Date ? video.createdAt.toISOString() : undefined;
     const fallbackLetter = displayName.charAt(0).toUpperCase();
+    let statusClassName = '';
+    if (highlightStatus) {
+        if (video.status === VIDEO_STATUS.CLAIMED) {
+            statusClassName = styles.blockStatusClaimed;
+        } else if (video.status === VIDEO_STATUS.REVISIONING) {
+            statusClassName = styles.blockStatusRevisioning;
+        } else if (video.status === VIDEO_STATUS.POSTED) {
+            statusClassName = styles.blockStatusPosted;
+        }
+    }
 
     return (
         <button
             type="button"
-            className={styles.block}
+            className={`${styles.block} ${statusClassName}`}
             onClick={() => onClick(video)}
             aria-label={`Open ${displayName}`}
         >

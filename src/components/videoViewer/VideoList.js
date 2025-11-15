@@ -12,6 +12,7 @@ export default function VideoList({
     onLoadMore,
     onSelect,
     canQuery,
+    highlightStatus = false,
 }) {
     return (
         <section className={styles.container}>
@@ -43,6 +44,7 @@ export default function VideoList({
                                 <VideoFileBlock
                                     key={video.id}
                                     video={video}
+                                    highlightStatus={highlightStatus}
                                     onClick={() => onSelect(video)}
                                 />
                             ))}

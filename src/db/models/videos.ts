@@ -28,11 +28,13 @@ export const VIDEO_STATUS = {
     READY: 'ready',
     REVISIONING: 'revisioning',
     CLAIMED: 'claimed',
+    POSTED: 'posted',
 } as const;
 export const VIDEO_STATUS_VALUES = [
     VIDEO_STATUS.READY,
     VIDEO_STATUS.REVISIONING,
     VIDEO_STATUS.CLAIMED,
+    VIDEO_STATUS.POSTED,
 ] as const;
 
 export type VideoCategory = (typeof VIDEO_CATEGORY_VALUES)[number];

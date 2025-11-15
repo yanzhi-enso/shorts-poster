@@ -166,3 +166,74 @@ export async function countClaimedVideosByOwner({ category, type, ownerId }) {
 
     return snapshot.data().count ?? 0;
 }
+
+/**
+ * List videos filtered only by category/type, ignoring status.
+ * @param {Object} params
+ * @param {import('db/models/videos').VideoCategory} params.category
+ * @param {import('db/models/videos').VideoType} params.type
+ * @param {number} [params.pageSize=DEFAULT_PAGE_SIZE]
+ * @param {import('firebase/firestore').DocumentSnapshot} [params.cursor]
+ * @returns {Promise<{videos: import('db/models/videos').VideoWithId[], cursor: import('firebase/firestore').DocumentSnapshot | null, hasMore: boolean}>}
+ */
+export async function listVideosByCategoryAndType({
+    category,
+    type,
+    pageSize = DEFAULT_PAGE_SIZE,
+    cursor = undefined,
+}) {
+    if (!category || !type) {
+        throw new Error('Both category and type are required to list videos.');
+    }
+
+    const constraints = [
+        where(VIDEO_COLLECTION.fields.category, '==', category),
+        where(VIDEO_COLLECTION.fields.type, '==', type),
+        orderBy(VIDEO_COLLECTION.fields.postWeekDay, 'desc'),
+        limit(pageSize),
+    ];
+
+    if (cursor) {
+        constraints.push(startAfter(cursor));
+    }
+
+    // Requires composite index: category ASC, type ASC, post_week_day DESC
+    const videoQuery = query(collection(db, COLLECTION_VIDEOS), ...constraints);
+    const snapshot = await getDocs(videoQuery);
+
+    const videos = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...parseVideoRecord(doc.data()),
+    }));
+    const hasMore = snapshot.docs.length === pageSize;
+    const nextCursor = hasMore ? snapshot.docs[snapshot.docs.length - 1] : null;
+
+    return {
+        videos,
+        cursor: nextCursor,
+        hasMore,
+    };
+}
+
+/**
+ * Count videos filtered by category/type only (no status filter).
+ * @param {Object} params
+ * @param {import('db/models/videos').VideoCategory} params.category
+ * @param {import('db/models/videos').VideoType} params.type
+ * @returns {Promise<number>}
+ */
+export async function countVideosByCategoryAndType({ category, type }) {
+    if (!category || !type) {
+        throw new Error('Both category and type are required to count videos.');
+    }
+
+    const constraints = [
+        where(VIDEO_COLLECTION.fields.category, '==', category),
+        where(VIDEO_COLLECTION.fields.type, '==', type),
+    ];
+
+    const baseQuery = query(collection(db, COLLECTION_VIDEOS), ...constraints);
+    const snapshot = await getCountFromServer(baseQuery);
+
+    return snapshot.data().count ?? 0;
+}
